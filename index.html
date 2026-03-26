@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Road Trip Mancos → Los Angeles · August 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --terra: #C4623A;
+    --terra-light: #E07B50;
+    --terra-dark: #9A4A2A;
+    --teal: #1B6B7A;
+    --teal-light: #2A8A9C;
+    --teal-dark: #0F4552;
+    --cream: #F6EDD8;
+    --cream-dark: #EBD9B4;
+    --sand: #D9C49A;
+    --dark: #1C140A;
+    --dark2: #2E2015;
+    --gold: #D4A843;
+    --blm-green: #4A7C59;
+    --park-amber: #C28B30;
+    --hotel-blue: #2D5F8A;
+    --text-body: #3A2A15;
+    --text-muted: #7A6040;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 70% 40%, rgba(196,98,58,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(27,107,122,0.25) 0%, transparent 50%),
+      linear-gradient(160deg, #1C140A 0%, #2E2015 45%, #3D2A10 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 6rem 8% 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--terra-light);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--terra);
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1.0;
+    margin-bottom: 0.5rem;
+    max-width: 12ch;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--terra-light);
+  }
+
+  .hero-sub {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    color: var(--sand);
+    margin-bottom: 3rem;
+    font-weight: 400;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 0.2rem; }
+
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sand);
+    font-weight: 400;
+  }
+
+  .hero-route-badge {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .route-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .pill-out  { background: rgba(196,98,58,0.2);  border: 1px solid rgba(196,98,58,0.45); color: #E8956A; }
+  .pill-back { background: rgba(27,107,122,0.2); border: 1px solid rgba(27,107,122,0.45); color: #5BBCCE; }
+
+  .pill-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .pill-out  .pill-dot { background: var(--terra-light); }
+  .pill-back .pill-dot { background: var(--teal-light); }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgba(255,255,255,0.25);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: bounce 2.5s ease-in-out infinite;
+  }
+
+  .hero-scroll::after { content: '↓'; font-size: 1rem; }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%       { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ─── NAV ───────────────────────────────── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(28,20,10,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(196,98,58,0.2);
+    padding: 0 8%;
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    height: 52px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 0 1.2rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    color: var(--terra-light);
+    border-color: var(--terra);
+  }
+
+  /* ─── SECTIONS ──────────────────────────── */
+  section { padding: 5rem 8%; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--terra);
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: currentColor;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.75rem;
+    line-height: 1.15;
+  }
+
+  h2 em { font-style: italic; color: var(--terra); }
+
+  .section-intro {
+    color: var(--text-muted);
+    font-size: 1rem;
+    max-width: 62ch;
+    margin-bottom: 3rem;
+    line-height: 1.7;
+  }
+
+  /* ─── MAP ───────────────────────────────── */
+  #map-section { background: var(--dark2); padding: 4rem 0 0; }
+  #map-section .map-header { padding: 0 8% 2.5rem; }
+  #map-section .section-label { color: var(--terra-light); }
+  #map-section h2 { color: var(--cream); }
+  #map-section h2 em { color: var(--terra-light); }
+  #map-section .section-intro { color: var(--sand); }
+
+  .map-legend {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--sand);
+    font-weight: 500;
+  }
+
+  .legend-line { width: 2rem; height: 3px; border-radius: 2px; }
+
+  #map { width: 100%; height: 520px; filter: saturate(0.85); }
+
+  /* ─── DAY CARDS ─────────────────────────── */
+  #outbound  { background: var(--cream); }
+  #la        { background: var(--dark2); }
+  #la .section-label { color: var(--terra-light); }
+  #la h2 { color: var(--cream); }
+  #la h2 em { color: var(--terra-light); }
+  #la .section-intro { color: var(--sand); }
+  #returnroute { background: #EFE5C8; }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .day-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 16px rgba(28,20,10,0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+
+  .day-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(28,20,10,0.14);
+  }
+
+  .card-tag-bg {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+    opacity: 0.09;
+    position: absolute;
+    top: 0.7rem;
+    right: 1.1rem;
+    pointer-events: none;
+    color: var(--dark);
+  }
+
+  .card-header {
+    padding: 1.25rem 1.25rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    gap: 0.5rem;
+  }
+
+  .card-day-num {
+    font-size: 0.63rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark);
+    max-width: 24ch;
+    line-height: 1.25;
+  }
+
+  .card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.22rem 0.55rem;
+    border-radius: 2rem;
+    font-size: 0.63rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .badge-blm   { background: #D4EAD6; color: #1E5E32; }
+  .badge-nf    { background: #C5DEC2; color: #174D26; }
+  .badge-motel { background: #E8D4F0; color: #5B2D7A; }
+  .badge-park  { background: #FBE8C5; color: #7D5115; }
+  .badge-hotel { background: #CCE0F0; color: #1A4870; }
+  .badge-home  { background: #E5DFF8; color: #3D2E8A; }
+
+  .card-body {
+    padding: 1rem 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .card-highlights {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .card-highlights strong { color: var(--text-body); font-weight: 500; }
+
+  .card-footer {
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    background: rgba(0,0,0,0.015);
+  }
+
+  .drive-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .drive-bar-wrap {
+    width: 55px;
+    height: 4px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .drive-bar { height: 100%; border-radius: 2px; }
+  .out-bar  { background: var(--terra); }
+  .back-bar { background: var(--teal); }
+
+  .drive-label { font-size: 0.73rem; font-weight: 600; color: var(--text-muted); }
+  .paw { font-size: 0.78rem; }
+  .off-leash-label { font-size: 0.73rem; font-weight: 600; }
+
+  /* ─── LA SPLIT CARD ─────────────────────── */
+  .la-split-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 640px) {
+    .la-split-card { grid-template-columns: 1fr; }
+    .la-split-half:first-child { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  }
+
+  .la-split-half { padding: 1.75rem; }
+  .la-split-half:first-child { border-right: 1px solid rgba(0,0,0,0.06); }
+
+  .la-split-title {
+    font-size: 0.63rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .la-film { color: var(--hotel-blue); }
+  .la-dog  { color: var(--blm-green); }
+
+  .la-split-item {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin-bottom: 0.6rem;
+    font-size: 0.875rem;
+    color: var(--text-body);
+  }
+
+  .la-day-badge {
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.06);
+    padding: 0.15rem 0.4rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .la-note {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+  }
+
+  .la-note-film { background: #EEF4FB; color: var(--hotel-blue); }
+  .la-note-dog  { background: #E6F2E8; color: var(--blm-green); }
+
+  /* ─── TIPS & COSTS ──────────────────────── */
+  #tips { background: var(--cream); }
+
+  .dog-table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.07);
+    margin-bottom: 3rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; background: white; font-size: 0.875rem; }
+
+  thead th {
+    background: var(--dark);
+    color: var(--cream);
+    padding: 0.9rem 1rem;
+    text-align: left;
+    font-size: 0.63rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 0.82rem 1rem; vertical-align: middle; color: var(--text-body); }
+  tbody tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+
+  .quality-stars { color: var(--gold); font-size: 0.88rem; letter-spacing: -0.05em; }
+
+  .costs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cost-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    border-left: 3px solid var(--terra);
+  }
+
+  .cost-card.teal  { border-color: var(--teal); }
+  .cost-card.gold  { border-color: var(--gold); }
+  .cost-card.green { border-color: var(--blm-green); }
+  .cost-card.purple { border-color: #8B5CF6; }
+
+  .cost-label { font-size: 0.63rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 0.35rem; }
+  .cost-val { font-family: 'Playfair Display', serif; font-size: 1.65rem; font-weight: 700; color: var(--dark); line-height: 1; }
+  .cost-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+  .cost-total {
+    background: var(--dark);
+    color: var(--cream);
+    border-radius: 10px;
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .cost-total-label { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.5; }
+  .cost-total-val { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--gold); }
+
+  /* ─── CHECKLIST ─────────────────────────── */
+  #checklist { background: #EFE5C8; }
+
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+
+  .check-item:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+
+  .check-item.done { opacity: 0.5; }
+  .check-item.done .check-text { text-decoration: line-through; }
+
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid rgba(0,0,0,0.14);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .check-item.done .check-box { background: var(--blm-green); border-color: var(--blm-green); color: white; }
+
+  .check-prio {
+    font-size: 0.63rem;
+    padding: 0.15rem 0.48rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .prio-red    { background: #FDDCDC; color: #B01010; }
+  .prio-yellow { background: #FEF0CC; color: #9A6A00; }
+  .prio-green  { background: #D4EAD6; color: #1E5E32; }
+
+  .check-link {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+
+  .check-item:hover .check-link { opacity: 1; }
+
+  /* ─── FOOTER ────────────────────────────── */
+  footer {
+    background: var(--dark);
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+    padding: 2.5rem 8%;
+    font-size: 0.78rem;
+    line-height: 1.9;
+  }
+
+  footer strong { color: var(--terra-light); }
+
+  /* ─── LEAFLET POPUP ─────────────────────── */
+  .leaflet-popup-content-wrapper {
+    border-radius: 10px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18) !important;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .popup-inner { padding: 0.25rem 0; }
+  .popup-title { font-weight: 700; font-size: 0.92rem; margin-bottom: 0.3rem; color: #1C140A; }
+  .popup-row { display: flex; gap: 0.5rem; align-items: center; color: #5A4030; font-size: 0.78rem; margin-bottom: 0.12rem; }
+  .popup-tag { background: #F0E8D8; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.68rem; font-weight: 700; color: #8A5030; }
+
+  /* ─── RESPONSIVE ────────────────────────── */
+  @media (max-width: 768px) {
+    section { padding: 3.5rem 5%; }
+    .hero { padding: 5rem 5% 3rem; }
+    .sticky-nav { padding: 0 5%; }
+    .hero-stats { gap: 1.5rem; }
+    .days-grid { grid-template-columns: 1fr; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .day-card { animation: fadeUp 0.4s ease both; }
+  .day-card:nth-child(1) { animation-delay: 0.05s; }
+  .day-card:nth-child(2) { animation-delay: 0.10s; }
+  .day-card:nth-child(3) { animation-delay: 0.15s; }
+  .day-card:nth-child(4) { animation-delay: 0.20s; }
+  .day-card:nth-child(5) { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ══════════════════════════════ -->
+<section class="hero" id="top">
+  <div class="hero-eyebrow">Road Trip · August 2026</div>
+  <h1>Mancos<br>to <em>Los<br>Angeles</em></h1>
+  <div class="hero-sub">and back — with two dogs</div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-val">10</div>
+      <div class="stat-label">Days</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">≈ 3,900</div>
+      <div class="stat-label">Kilometers</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">3 + 2</div>
+      <div class="stat-label">People & Dogs</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">8×</div>
+      <div class="stat-label">Free BLM nights</div>
+    </div>
+  </div>
+
+  <div class="hero-route-badge">
+    <div class="route-pill pill-out">
+      <span class="pill-dot"></span>
+      Outbound: Desert Southwest
+    </div>
+    <div class="route-pill pill-back">
+      <span class="pill-dot"></span>
+      Return: Sierra Nevada &amp; Great Basin
+    </div>
+  </div>
+
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- ═══ STICKY NAV ════════════════════════ -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a class="nav-link" href="#map-section">Map</a>
+    <a class="nav-link" href="#outbound">Outbound</a>
+    <a class="nav-link" href="#la">Los Angeles</a>
+    <a class="nav-link" href="#returnroute">Return</a>
+    <a class="nav-link" href="#tips">Dogs &amp; Costs</a>
+    <a class="nav-link" href="#checklist">Bookings</a>
+    <a class="nav-link" href="#gear">Gear List</a>
+  </div>
+</nav>
+
+<!-- ═══ MAP ═══════════════════════════════ -->
+<section id="map-section">
+  <div class="map-header">
+    <div class="section-label">Interactive Route</div>
+    <h2>The <em>Full Loop</em></h2>
+    <p class="section-intro">Two completely different routes — outbound through the Desert Southwest via Route 66, return through the Sierra Nevada and Nevada's Great Basin. Click any marker for details.</p>
+    <div class="map-legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background:var(--terra-light)"></div>
+        Outbound (Days 1–3)
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background:var(--teal-light)"></div>
+        Return (Days 6–10)
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background:var(--gold)"></div>
+        Los Angeles
+      </div>
+    </div>
+  </div>
+  <div id="map"></div>
+</section>
+
+<!-- ═══ OUTBOUND ═══════════════════════════ -->
+<section id="outbound">
+  <div class="section-label">Days 1–3</div>
+  <h2>Outbound — <em>Desert Southwest</em></h2>
+  <p class="section-intro">Three days through the red rock country of the Colorado Plateau — Valley of the Gods, Monument Valley, Route 66, and a night at Rainbow Basin before rolling into LA well-rested.</p>
+
+  <div class="days-grid">
+
+    <!-- DAY 1 -->
+    <div class="day-card">
+      <div class="card-tag-bg">01</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 1 · Mon Aug 3</div>
+          <div class="card-title">Valley of the Gods → Monument Valley → Flagstaff</div>
+        </div>
+        <span class="card-badge badge-nf">🌲 Nat. Forest</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          <strong>Valley of the Gods BLM</strong> — 2.5h from Mancos. Spectacular sandstone buttes, virtually no crowds, 17 km dirt road. Dogs off-leash across the whole plateau. 1–1.5h walk, then roll on.<br><br>
+          <strong>Monument Valley overlook</strong> — 45 min, iconic photos, no long hike in August heat. Free overlook at View Hotel.<br><br>
+          Kayenta → Tuba City → Cameron → <strong>Flagstaff / Coconino NF</strong> dispersed camping ~15 min outside town. At 2,100m — 10°C cooler than the desert. Off-leash in undeveloped NF areas.
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar out-bar" style="width:80%"></div></div>
+          <span class="drive-label">~6h (with stops)</span>
+        </div>
+        <div class="off-leash">
+          <span class="paw">🐾🐾</span>
+          <span class="off-leash-label" style="color:var(--blm-green)">BLM + NF Off-Leash</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 2 -->
+    <div class="day-card">
+      <div class="card-tag-bg">02</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 2 · Tue Aug 4</div>
+          <div class="card-title">Flagstaff → Route 66 → Rainbow Basin BLM</div>
+        </div>
+        <span class="card-badge badge-blm">⛺ BLM / Motel</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          <strong>Williams</strong> — breakfast at the historic Route 66 depot.<br>
+          <strong>Seligman</strong> — the beating heart of Route 66; classic diners, dogs welcome on patios.<br>
+          Kingman → I-40 → Barstow → <strong>Rainbow Basin Natural Area BLM</strong> (15 min north of Barstow): colorful Miocene badlands, free dispersed camping, off-leash ✅. OR pet-friendly motel in Barstow ($60–80) + early morning walk.
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar out-bar" style="width:72%"></div></div>
+          <span class="drive-label">~5h</span>
+        </div>
+        <div class="off-leash">
+          <span class="paw">🐾</span>
+          <span class="off-leash-label" style="color:var(--blm-green)">Rainbow Basin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 3 -->
+    <div class="day-card">
+      <div class="card-tag-bg">03</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 3 · Wed Aug 5</div>
+          <div class="card-title">Barstow → Los Angeles ☀️</div>
+        </div>
+        <span class="card-badge badge-park">⛺ State Park / Motel</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          Short day — leave early, arrive LA relaxed and mid-morning before traffic builds.<br><br>
+          <strong>P1+2</strong>: P3 drops them at Andaz West Hollywood (Sunset Strip), then done with the car.<br>
+          <strong>P3 + dogs</strong>: continue directly on US-101 west → Ventura → CA-33 north to <strong>Los Padres NF / Reyes Peak</strong> (~1.5h from WeHo). Free NF dispersed camp at 2,000m — no booking needed.
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar out-bar" style="width:28%"></div></div>
+          <span class="drive-label">~2h 🎉</span>
+        </div>
+        <div class="off-leash">
+          <span class="off-leash-label" style="color:var(--blm-green)">Los Padres NF</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ LOS ANGELES ════════════════════════ -->
+<section id="la">
+  <div class="section-label">Days 4–5</div>
+  <h2>Los <em>Angeles</em> — two full days</h2>
+  <p class="section-intro">Split plan: film &amp; Hollywood for P1+2 in West Hollywood (no car needed) — mountains &amp; off-leash for P3 and the dogs in Los Padres NF. Reunion Day 5 in Ventura, then all three continue to Los Padres together for the last night. 🤝</p>
+
+  <div class="la-split-card">
+    <div class="la-split-half">
+      <div class="la-split-title la-film">🎬 Person 1 + 2 — Film Days · West Hollywood</div>
+
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 4</span>
+        Hollywood Walk of Fame + TCL Chinese Theatre
+      </div>
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 4</span>
+        Academy Museum of Motion Pictures ⭐ — unmissable
+      </div>
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 4</span>
+        Griffith Observatory (La La Land filming location)
+      </div>
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 5</span>
+        <strong>Warner Bros. Studio Tour</strong> — book in advance!
+      </div>
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 5</span>
+        Uber to Ventura Pier → Reunion with P3 (~14:00) 🤝
+      </div>
+
+      <div class="la-note la-note-film">
+        🏨 Hotel: Andaz West Hollywood (Hyatt) · Sunset Strip<br>
+        No pets (dogs stay at campsite with P3) · ~$220–380/night
+      </div>
+    </div>
+
+    <div class="la-split-half">
+      <div class="la-split-title la-dog">🐾 Person 3 + 2 Dogs — Los Padres NF Base</div>
+
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 3</span>
+        After WeHo drop-off: US-101 west → Ventura → <strong>CA-33 north → Los Padres NF</strong> (~1.5h). Set up camp at 2,000m, evening walk off-leash ✅
+      </div>
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 4</span>
+        Full day in <strong>Los Padres NF</strong> — Reyes Peak, Pine Mountain, Thorn Meadows. Off-leash NF throughout ✅✅. 18–22°C, no crowds.
+      </div>
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 5</span>
+        Morning hike. ~13:30: drive down to <strong>Ventura</strong> (~45 min). Pick up P1+2 at Ventura Pier (they Uber from Burbank after Warner Bros.). All continue → CA-126 → CA-14 → US-395 → <strong>Lone Pine / Alabama Hills</strong> (~3–3.5h, arrive ~18:00).
+      </div>
+      <div class="la-split-item">
+        <span class="la-day-badge">Day 6</span>
+        Lone Pine → US-395 → Mammoth Lakes (~1.5h) 🎉
+      </div>
+
+      <div class="la-note la-note-dog">
+        ⛺ <strong>Los Padres NF dispersed — free, no booking, always available.</strong> 2 nights P3 solo.<br>
+        Night 3 all together: <strong>Alabama Hills BLM</strong> — dispersed, off-leash ✅✅, free. Iconic film location (Gladiator, Iron Man, countless Westerns).<br>
+        🏨 Alt. motel in Lone Pine: <strong>Dow Villa Motel</strong> (since 1923, John Wayne &amp; Gary Cooper stayed here) or <strong>Best Western Plus Frontier</strong> — ~$130–200/night Aug., confirm pet-friendly before booking.<br>
+        Reunion: P1+2 Uber Burbank → Ventura (~$40) after Warner Bros., P3 picks up at Ventura Pier.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RETURN ═════════════════════════════ -->
+<section id="returnroute">
+  <div class="section-label">Days 6–10</div>
+  <h2>Return — <em>Sierra Nevada &amp; Great Basin</em></h2>
+  <p class="section-intro">The best leg of the trip for dogs: cooler temperatures, massive BLM tracts, off-leash everywhere. Mammoth Lakes is the undisputed highlight — a rest day worth every hour of driving.</p>
+
+
+  <div class="days-grid">
+
+    <!-- DAY 6 -->
+    <div class="day-card">
+      <div class="card-tag-bg">06</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 6 · Sat Aug 8</div>
+          <div class="card-title">Lone Pine → Mono Lake → Mammoth Lakes</div>
+        </div>
+        <span class="card-badge badge-nf">🌲 Inyo NF</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          Morning walk in <strong>Alabama Hills</strong> before heading out — off-leash ✅✅, golden hour light on the Sierra.<br><br>
+          <strong>Mono Lake BLM stop</strong> — tufa towers, off-leash ✅✅, one of the most surreal landscapes in the US.<br><br>
+          <strong>Mammoth Lakes</strong> — arrive early, Sherwin Meadows walk, dinner in the Village.
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar back-bar" style="width:22%"></div></div>
+          <span class="drive-label">~1.5h 🎉</span>
+        </div>
+        <div class="off-leash">
+          <span class="paw">🐾🐾</span>
+          <span class="off-leash-label" style="color:var(--teal)">Inyo NF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 7 -->
+    <div class="day-card">
+      <div class="card-tag-bg">07</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 7 · Sun Aug 9</div>
+          <div class="card-title">Mammoth Lakes — Rest Day 🏆</div>
+        </div>
+        <span class="card-badge badge-nf">🌲 Inyo NF</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          <strong>Best off-leash stop of the entire trip!</strong><br><br>
+          <strong>Sherwin Meadows</strong> — known dog gathering spot, off-leash ✅<br>
+          <strong>Horseshoe Lake</strong> — sandy beach, dogs swim ✅<br>
+          <strong>Wild Willy's Hot Springs</strong> — BLM land, dogs free, perfect sunset 🐾🐾<br><br>
+          18–24°C at 2,700m — a paradise after desert heat.
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar back-bar" style="width:0%"></div></div>
+          <span class="drive-label">Rest day 🛌</span>
+        </div>
+        <div class="off-leash">
+          <span class="paw">🐾🐾</span>
+          <span class="off-leash-label" style="color:var(--teal)">Off-leash everywhere</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 8 -->
+    <div class="day-card">
+      <div class="card-tag-bg">08</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 8 · Mon Aug 10</div>
+          <div class="card-title">Mammoth → Bishop → Tonopah, NV</div>
+        </div>
+        <span class="card-badge badge-blm">⛺ BLM</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          <strong>Bishop</strong> — grocery stop, lunch.<br>
+          <strong>US-6 east</strong> through Benton and Basalt — quiet road, desert scenery, BLM on both sides of the highway.<br><br>
+          <strong>Tonopah, NV</strong> — free dispersed BLM camping, off-leash ✅, extraordinary dark-sky stargazing. Sits at ~1,800m (6,000 ft) — surprisingly cool nights despite the Nevada desert.
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar back-bar" style="width:68%"></div></div>
+          <span class="drive-label">~5h</span>
+        </div>
+        <div class="off-leash">
+          <span class="paw">🐾</span>
+          <span class="off-leash-label" style="color:var(--teal)">Nevada BLM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 9 -->
+    <div class="day-card">
+      <div class="card-tag-bg">09</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 9 · Tue Aug 11</div>
+          <div class="card-title">Tonopah → Grand Staircase BLM</div>
+        </div>
+        <span class="card-badge badge-blm">⛺ BLM</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          US-93 south → Caliente, NV → Cedar City, UT.<br>
+          <strong>Red Canyon / Dixie NF</strong> — short hike stop among pink hoodoos.<br><br>
+          <strong>Grand Staircase-Escalante NM</strong> — nearly the entire monument is off-leash BLM ✅✅. Hole-in-the-Rock Road. One of the darkest skies in the USA.<br><br>
+          <em>Tip: hike at 07:00–10:00. Afternoon temps 32–38°C — dogs will thank you.</em>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar back-bar" style="width:78%"></div></div>
+          <span class="drive-label">~5.5h</span>
+        </div>
+        <div class="off-leash">
+          <span class="paw">🐾🐾</span>
+          <span class="off-leash-label" style="color:var(--blm-green)">Off-Leash TOP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 10 -->
+    <div class="day-card">
+      <div class="card-tag-bg">10</div>
+      <div class="card-header">
+        <div>
+          <div class="card-day-num">Day 10 · Wed Aug 12</div>
+          <div class="card-title">Grand Staircase → Capitol Reef → Mancos 🏠</div>
+        </div>
+        <span class="card-badge badge-home">🏠 Home</span>
+      </div>
+      <div class="card-body">
+        <div class="card-highlights">
+          <strong>Devils Garden</strong> — 1 mi off-leash BLM loop, bizarre rock formations, almost no tourists.<br>
+          <strong>UT-12 Scenic Byway</strong> — officially one of the most beautiful roads in the USA (Hogsback Ridge, Head of the Rocks).<br>
+          Capitol Reef drive-through → UT-24 → Hanksville → US-191 → Blanding → US-160 → Mancos.<br><br>
+          Home by ~17:00. 🏡
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="drive-time">
+          <div class="drive-bar-wrap"><div class="drive-bar back-bar" style="width:71%"></div></div>
+          <span class="drive-label">~5h</span>
+        </div>
+        <div class="off-leash">
+          <span class="paw">🐾</span>
+          <span class="off-leash-label" style="color:var(--blm-green)">BLM stop</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ TIPS & COSTS ══════════════════════ -->
+<section id="tips">
+  <div class="section-label">Dogs &amp; Budget</div>
+  <h2>🐾 Off-Leash <em>Guide</em></h2>
+  <p class="section-intro">BLM (Bureau of Land Management) = the most dog-friendly camping in the USA. Free, no reservation, off-leash allowed under voice control. Always have your leash handy.</p>
+
+  <div class="dog-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Location</th>
+          <th>Off-Leash</th>
+          <th>Type</th>
+          <th>Aug. Temp</th>
+          <th>Rating</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Valley of the Gods BLM</strong></td>
+          <td>✅✅ Yes</td>
+          <td>BLM</td>
+          <td>28–35°C (cool mornings)</td>
+          <td><span class="quality-stars">★★★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Coconino NF, Flagstaff</strong></td>
+          <td>✅ Outside camp</td>
+          <td>NF undeveloped</td>
+          <td>22–28°C (2,100m!)</td>
+          <td><span class="quality-stars">★★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Rainbow Basin BLM (Barstow)</strong></td>
+          <td>✅✅ Yes</td>
+          <td>BLM</td>
+          <td>35–40°C day / 22°C night</td>
+          <td><span class="quality-stars">★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Mono Lake BLM</strong></td>
+          <td>✅✅ Yes</td>
+          <td>BLM</td>
+          <td>25–33°C</td>
+          <td><span class="quality-stars">★★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Mammoth — Sherwin Meadows</strong></td>
+          <td>✅✅ Known dog spot</td>
+          <td>Inyo NF</td>
+          <td>18–24°C (2,700m)</td>
+          <td><span class="quality-stars">★★★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Wild Willy's Hot Springs</strong></td>
+          <td>✅✅ BLM</td>
+          <td>BLM</td>
+          <td>Cool evenings</td>
+          <td><span class="quality-stars">★★★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Tonopah, NV BLM</strong></td>
+          <td>✅✅ Yes</td>
+          <td>BLM Nevada</td>
+          <td>28–35°C (dry)</td>
+          <td><span class="quality-stars">★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Grand Staircase-Escalante</strong></td>
+          <td>✅✅ Almost everywhere</td>
+          <td>BLM / Nat. Monument</td>
+          <td>32–38°C (better evenings)</td>
+          <td><span class="quality-stars">★★★★★</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 style="margin-top:3rem">💰 <em>Cost</em> Breakdown</h2>
+  <p class="section-intro" style="margin-bottom:1.5rem">Accommodation, Uber, and showers. Fuel, food, and entrance fees come on top.</p>
+
+  <div class="costs-grid">
+    <div class="cost-card green">
+      <div class="cost-label">BLM/NF dispersed (8 nights)</div>
+      <div class="cost-val">$0</div>
+      <div class="cost-note">Free, no reservation needed</div>
+    </div>
+    <div class="cost-card green">
+      <div class="cost-label">Los Padres NF dispersed — P3 (3 nights)</div>
+      <div class="cost-val">$0</div>
+      <div class="cost-note">Free, no booking, always available</div>
+    </div>
+    <div class="cost-card teal">
+      <div class="cost-label">Hotel WeHo (2 nights, P1+2 only)</div>
+      <div class="cost-val">$440–760</div>
+      <div class="cost-note">Andaz WeHo — no pet fee (dogs with P3)</div>
+    </div>
+    <div class="cost-card purple">
+      <div class="cost-label">Motel Barstow (optional, Day 2)</div>
+      <div class="cost-val">$60–80</div>
+      <div class="cost-note">Motel 6 / Super 8, pet-friendly — if Rainbow Basin too hot</div>
+    </div>
+    <div class="cost-card gold">
+      <div class="cost-label">Uber LA (WeHo ↔ Malibu × 4)</div>
+      <div class="cost-val">$130–160</div>
+      <div class="cost-note">~$65 each way</div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-label">Showers (~7× Planet Fitness / rec centers)</div>
+      <div class="cost-val">$50–80</div>
+      <div class="cost-note">$10–15 day pass · Flagstaff ✅ · Thousand Oaks (20 min von Ventura/Los Padres) ✅ · Cedar City ✅ · Mammoth: Shady Rest Rec Center instead</div>
+    </div>
+  </div>
+
+  <div class="cost-total">
+    <div>
+      <div class="cost-total-label">Total · Accommodation + Uber + Showers</div>
+      <div style="font-size:0.72rem;opacity:0.35;margin-top:0.2rem">Fuel, food, and entrance fees not included</div>
+    </div>
+    <div class="cost-total-val">$800–1,200</div>
+  </div>
+
+  <div style="margin-top:2rem;padding:1.25rem;background:#FEF0CC;border-radius:10px;border-left:3px solid var(--gold);font-size:0.875rem;color:var(--text-body)">
+    <strong>⚠️ August heat rules for dogs:</strong> Hike only before 09:00 or after 17:30. Test asphalt with your bare hand before letting dogs walk on it. Minimum 5L water per dog per day. At Mammoth and Grand Staircase: dog food = food — always store in bear canister or locked car!
+  </div>
+</section>
+
+<!-- ═══ BOOKING CHECKLIST ════════════════ -->
+<section id="checklist">
+  <div class="section-label">To-Do</div>
+  <h2>🔴 Booking <em>Checklist</em></h2>
+  <p class="section-intro" style="margin-bottom:2rem">In August, top spots are gone within minutes. Everything marked 🔴 must be booked immediately.</p>
+
+  <div class="checklist">
+
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🟢 Coordinate</span>
+      <div class="check-text">
+        <strong>Day 5 reunion — Ventura Pier, ~14:00</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">P1+2 Uber from Burbank (after Warner Bros.) to Ventura Pier (~$40, 35 min on US-101). P3 drives down from Los Padres NF (~45 min on CA-33). No booking needed — Los Padres NF dispersed is always free and available.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">🔴 Now</span>
+      <div class="check-text">
+        <strong>Hotel West Hollywood</strong> — 2 nights (Aug 6–8)
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Andaz WeHo (Hyatt) — no pet fee, dogs stay with P3 at Los Padres NF. Alternative: Hollywood Hotel.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">🟡 Soon</span>
+      <div class="check-text">
+        <strong>Warner Bros. Studio Tour</strong> — Day 5 (Aug 7)
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Timed entry, book ahead. ~$75/person. Best film insider experience in LA.</div>
+      </div>
+      <a class="check-link" href="https://www.wbstudiotour.com" target="_blank">→ book</a>
+    </div>
+
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">🟡 Soon</span>
+      <div class="check-text">
+        <strong>Academy Museum of Motion Pictures</strong> — Day 4 (Aug 6)
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Timed entry recommended. Unique film content — don't miss it.</div>
+      </div>
+      <a class="check-link" href="https://www.academymuseum.org" target="_blank">→ book</a>
+    </div>
+
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🟢 Apps</span>
+      <div class="check-text">
+        <strong>Gaia GPS</strong> — download offline maps before leaving (BLM boundaries, forest roads)
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Essential for all BLM spots. Save coordinates offline — no cell signal in the backcountry!</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🟢 Apps</span>
+      <div class="check-text">
+        <strong>Campendium + iOverlander</strong> — download offline
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Up-to-date reviews of all free BLM spots with GPS coordinates and road conditions</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🟢 Pack</span>
+      <div class="check-text">
+        <strong>Dog emergency kit</strong>: coconut oil (Malibu tar), paw protection, bear canister, 10L extra water
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Bear areas: Mammoth &amp; Grand Staircase. Dog food = food → always lock it away!</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ DISPERSED CAMPING GEAR LIST ═════ -->
+<section id="gear">
+  <div class="section-label">Dispersed Camping</div>
+  <h2>🎒 Gear <em>List</em></h2>
+  <p class="section-intro">BLM and NF dispersed sites have <strong>zero infrastructure</strong> — no water, no toilets, no fire rings, no waste disposal. Everything you need, you carry in and out. Tent camping is 100% allowed (no vehicle required). Below is what you need for this specific trip.</p>
+
+  <div style="margin-bottom:1.5rem;padding:1rem 1.25rem;background:#E8F2E9;border-radius:10px;border-left:3px solid var(--blm-green);font-size:0.85rem">
+    <strong>Tent camping on BLM / NF dispersed — yes, 100% allowed.</strong> No RV or roof tent required. Set up wherever the terrain allows, at least 200 ft from water sources and trails. 14-night limit per spot. Leave No Trace — pack out everything.
+  </div>
+
+  <div class="checklist">
+
+    <!-- WATER -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">💧 Water</span>
+      <div class="check-text">
+        <strong>40L capacity minimum for 3 people + 2 dogs</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">No water at any dispersed site. Fill at every town before heading out. Gear: 2× 20L jerry cans or large water jugs, 1L Nalgene per person for hiking, 1× Sawyer Squeeze filter (emergencies), iodine tablets as last resort. Dogs: 1–2L each per day in August heat. Never let dogs drink from streams (Giardia).</div>
+      </div>
+    </div>
+
+    <!-- SHELTER -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">🏕 Shelter</span>
+      <div class="check-text">
+        <strong>3-season tent · sleeping bags (rated 0°C) · pads · ground tarp</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Mammoth Lakes and Tonopah can drop to 5–8°C at night even in August — don't underestimate elevation. Sleeping pad R-value ≥ 2. Ground tarp/footprint under tent to prevent moisture. Extra tent stakes (desert ground can be hard, winds at Grand Staircase can be strong). Seam-seal your tent before leaving — monsoon storms are real. Tent repair kit (patches, seam sealer).</div>
+      </div>
+    </div>
+
+    <!-- COOKING -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">🔥 Cooking</span>
+      <div class="check-text">
+        <strong>Camp stove · 4 fuel canisters · pot set · cooler · utensils</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem"><strong>Fire bans are almost guaranteed in August</strong> in AZ, UT, NV — never rely on open fire. Jetboil or MSR PocketRocket. Bring: 2L pot + lid, frying pan, 3× camp mugs, 3× sporks, folding knife, cutting board, can opener, lighter × 2. Cooler (hard-sided if possible): fill with block ice every 2–3 days at gas stations. Ziplock bags for leftovers. Biodegradable soap (Dr. Bronner's) + sponge. 3× large garbage bags. Cooler stays in car or in shade — never in direct sun.</div>
+      </div>
+    </div>
+
+    <!-- FOOD PLANNING -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">🥫 Food Planning</span>
+      <div class="check-text">
+        <strong>Plan meals for 3–4 days ahead at all times</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Long stretches with no shops: Valley of Gods → Monument Valley → Flagstaff (buy in Bluff or Mexican Hat), Tonopah → Grand Staircase (buy in Cedar City), Grand Staircase → Mancos (buy in Escalante or Torrey). Stock up: instant oats, pasta, rice, canned beans, peanut butter, tortillas, hard cheese, dried fruit, nuts, energy bars, instant coffee. Fresh food lasts 2–3 days in a good cooler. Bear canister required at Mammoth + Grand Staircase — pack all food inside.</div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">🗺 Navigation</span>
+      <div class="check-text">
+        <strong>Gaia GPS (offline BLM maps) · Campendium · iOverlander · paper map</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Download offline maps and BLM boundary layers before leaving — zero cell signal at Valley of Gods, Tonopah BLM, Grand Staircase, Los Padres NF, and more. Save GPS coordinates of each planned camp. Campendium and iOverlander: community reviews with road conditions and exact coordinates. Physical AAA Southwest map as hard backup. Note: Google Maps is useless without cell signal — Gaia GPS is mandatory.</div>
+      </div>
+    </div>
+
+    <!-- SAFETY -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">📡 Emergency</span>
+      <div class="check-text">
+        <strong>Satellite communicator (Garmin inReach Mini) · first aid kit · emergency blanket</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">No cell signal at multiple stops — the inReach lets you send an SOS or message anyone from anywhere on earth. First aid kit contents: adhesive bandages (various sizes), Moleskin (blisters), gauze + medical tape, tweezers (cactus spines, splinters), SAM splint, Ace bandage, ibuprofen + paracetamol, antihistamine (Benadryl), Imodium (stomach upset), antiseptic wipes, blister treatment (Compeed), emergency blanket × 2. Whistle. Lighter. Written emergency contact list (paper, not just in phone).</div>
+      </div>
+    </div>
+
+    <!-- SANITATION / SHOWER -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-red">🚿 Shower &amp; Toilet</span>
+      <div class="check-text">
+        <strong>No toilets at dispersed sites — ever. Pop-up shower tent + solar shower bag.</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem"><strong>Toilet:</strong> Sturdy trowel (Deuce of Spades or similar) — desert ground is rock-hard. Cathole: 15–20 cm deep, 60m from water/trails/camp. Toilet paper in paper bag → pack out. Hand sanitizer immediately after. WAG bags as alternative (pack-out bags, mandatory in some areas).<br>
+        <strong>Shower:</strong> Pop-up privacy tent (~$30, folds to a disc) + 20L solar shower bag (leave in sun 2–3h for warm water). Biodegradable soap. Microfiber towels × 3. Alternatively: Planet Fitness day pass ($10–15): Flagstaff ✅ · Thousand Oaks (Day 3–5, ~30 min from Los Padres via Ojai) ✅ · Cedar City (Day 9) ✅. Mammoth Lakes: Shady Rest Rec Center ($8–10). Tonopah: Jim Butler Motel or truck stop shower (~$10).</div>
+      </div>
+    </div>
+
+    <!-- CLOTHING -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">👕 Clothing</span>
+      <div class="check-text">
+        <strong>Layers for 5°C nights and 38°C days — same trip</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Per person: 2× lightweight hiking pants/shorts, 2× long-sleeve UV protection shirts (UPF 50+), 1× fleece or down jacket (mandatory for Mammoth/Tonopah evenings), 1× hardshell rain jacket, 3× merino wool socks (dry fast, no blisters), underwear × 4, warm beanie (nights at elevation), wide-brim sun hat, buff/neck gaiter (dust), hiking boots or trail runners (worn in!), camp sandals (Crocs/Birkenstock). Swimwear for Horseshoe Lake (Mammoth) and Wild Willy's Hot Springs.</div>
+      </div>
+    </div>
+
+    <!-- LIGHTING & POWER -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">🔦 Lighting &amp; Power</span>
+      <div class="check-text">
+        <strong>Headlamps × 3 · power bank 20,000 mAh · 12V car charger · camp lantern</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Headlamp (Black Diamond Spot or similar) per person + spare batteries. Camp lantern (LED, rechargeable) for cooking and evenings. Power bank: 20,000+ mAh covers 2 full phone charges each. 12V car charger: charge power banks + devices while driving. Optional: 60W folding solar panel — useful for 3-night stretches like Grand Staircase. No power outlets at any dispersed site.</div>
+      </div>
+    </div>
+
+    <!-- SUN & HEAT -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">☀️ Sun &amp; Heat</span>
+      <div class="check-text">
+        <strong>SPF 50+ sunscreen · UV shirt · wide-brim hat · shade tarp</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">High altitude + desert = brutal UV. Valley of Gods, Rainbow Basin, Tonopah, Grand Staircase all exceed 35°C midday. Hike before 09:00 or after 17:30 without exception. Test asphalt with your bare hand before letting dogs walk on it — paw burns happen within seconds. Shade tarp (3×3m, with poles) for midday camp shade. Cooling towels for dogs. Never leave dogs or food in parked car.</div>
+      </div>
+    </div>
+
+    <!-- RAIN & STORMS -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">🌧 Rain &amp; Flash Floods</span>
+      <div class="check-text">
+        <strong>Rain jacket · seam-sealed tent · Rain Alarm app</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">August = monsoon season in AZ and UT. Afternoon thunderstorms are common, intense, and fast. <strong>Flash flood rule:</strong> never camp in a wash, canyon bottom, or dry riverbed — they fill in minutes from storms miles away. Camp on high ground. Check radar every morning (Rain Alarm or Weather Underground). If thunder: off ridge tops and summits immediately. All gear in waterproof bags or dry bags when not in use.</div>
+      </div>
+    </div>
+
+    <!-- BEARS -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">🐻 Bears</span>
+      <div class="check-text">
+        <strong>Bear canister (BearVault BV500) required at Mammoth + Grand Staircase</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Dog food = food. Toothpaste, sunscreen, deodorant, lip balm = scented items. All must go into the bear canister or locked car boot — never in the tent, never on the picnic table. BearVault BV500 holds ~4 days of food for 2 people. At Los Padres NF (Ventura back-country): black bears present, same rules apply. Hang food in a tree if no canister at non-required areas.</div>
+      </div>
+    </div>
+
+    <!-- DOGS -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-yellow">🐾 Dogs</span>
+      <div class="check-text">
+        <strong>Dog food (in bear canister) · 2× collapsible bowl · 2× leashes · dog first aid kit · paw care</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Dog first aid kit: vet wrap, antiseptic wipes, tweezers (cactus thorns), eye wash, small cone (Elizabethan collar), metronidazole tablets (Giardia — get prescription from vet before trip). Paw care: coconut oil or butter (removes tar), paw balm (cracked pads from hot rock), booties optional. Dog sleeping pads for cold nights (Mammoth, Tonopah). Cooling mat or wet towel for car stops. Flea/tick treatment applied before trip (Nexgard or Frontline). Cooling vest for hot hiking. Always carry leash even on BLM — be ready instantly.</div>
+      </div>
+    </div>
+
+    <!-- COMFORT -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🪑 Comfort</span>
+      <div class="check-text">
+        <strong>Camp chairs × 3 · folding table · shade tarp with poles</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">You'll spend a lot of time at camp. Lightweight camp chairs (Helinox or similar). Small folding table for cooking. 3×3m tarp on trekking poles or bungee lines = shade shelter for midday. Hammock if space allows (great in Los Padres NF trees). Duct tape (fixes everything). Rope/paracord (tarp lines, hanging food).</div>
+      </div>
+    </div>
+
+    <!-- VEHICLE -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🚗 Vehicle</span>
+      <div class="check-text">
+        <strong>Full tank before every BLM road · spare tire (inflated!) · recovery kit</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Valley of Gods: 17 km dirt road (2WD OK when dry). Rainbow Basin: gravel, fine. Grand Staircase Hole-in-the-Rock Road: sandy sections possible. Los Padres CA-33: paved but winding mountain road. Fill gas in last town before any dirt road. Recovery kit: tire plug kit + 12V air compressor, jumper cables, tow strap, small shovel, WD-40. Basic toolkit (pliers, screwdrivers, zip ties). Road flares or reflective triangles. Note tire pressure recommended for your vehicle — deflate slightly for sand.</div>
+      </div>
+    </div>
+
+    <!-- HYGIENE -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🧴 Hygiene</span>
+      <div class="check-text">
+        <strong>Biodegradable soap only · wet wipes · hand sanitizer · microfiber towels</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Regular soap pollutes water sources. Dr. Bronner's castile soap works for body, dishes, and laundry. Wet wipes (biodegradable) for quick clean-ups. Microfiber towels × 3 (pack small, dry fast). Hand sanitizer before every meal — always. Dental hygiene: spit toothpaste 60m from water. Store all scented items (toothpaste, deodorant, sunscreen) in bear canister at Mammoth/Grand Staircase. Small mirror for splinter removal.</div>
+      </div>
+    </div>
+
+    <!-- FIRE -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">🔥 Fire Rules</span>
+      <div class="check-text">
+        <strong>Check fire restrictions daily — August = high fire danger throughout the Southwest</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">Check: fs.usda.gov/alerts (NF areas) and blm.gov/programs/fire (BLM areas) each morning. Fire bans are common and fines are serious. If fires allowed: use only established fire rings or a fire pan (Leave No Trace). Never leave fire unattended. Drown with water, stir, drown again — cold to the touch before sleeping. Camp stove is your primary cooking method regardless. Fire extinguisher in the car.</div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTATION -->
+    <div class="check-item" onclick="this.classList.toggle('done');this.querySelector('.check-box').textContent=this.classList.contains('done')?'✓':''">
+      <div class="check-box"></div>
+      <span class="check-prio prio-green">📄 Documents</span>
+      <div class="check-text">
+        <strong>ID · insurance · America the Beautiful Pass · emergency contacts (paper)</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">America the Beautiful Annual Pass ($80) covers all NPS day-use fees (Capitol Reef, Grand Canyon overlook, etc.) — worth it for this trip. BLM and NF dispersed: no permit needed. Dog vaccination records (some NPS areas require proof at trailhead). Vet's emergency phone number. Written list of emergency contacts — do not rely only on your phone. Roadside assistance number (AAA or equivalent). Download all reservations offline (hotel, Warner Bros. etc.).</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════ -->
+<footer>
+  <strong>Mancos, CO → Los Angeles, CA → Mancos, CO</strong><br>
+  August 3–12, 2026 · 3 People + 2 Dogs · ≈ 3,700 km · 10 Days<br><br>
+  BLM = Bureau of Land Management · All dispersed camp sites: free, max. 14 days, Leave No Trace.<br>
+  Check weather daily — August = monsoon season in Arizona &amp; Utah!
+</footer>
+
+<!-- ═══ MAP SCRIPT ═════════════════════════ -->
+<script>
+  const map = L.map('map', {
+    center: [37.0, -112.5],
+    zoom: 6,
+    scrollWheelZoom: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(map);
+
+  const TERRA = '#E07B50';
+  const TEAL  = '#2A8A9C';
+  const GOLD  = '#D4A843';
+
+  // Outbound route (with Barstow)
+  const outRoute = [
+    [37.346, -108.290],  // Mancos
+    [37.311, -109.878],  // Valley of the Gods
+    [36.998, -110.099],  // Monument Valley
+    [36.715, -110.255],  // Kayenta
+    [35.198, -111.651],  // Flagstaff
+    [35.249, -112.191],  // Williams
+    [35.327, -112.877],  // Seligman
+    [35.010, -114.580],  // Kingman
+    [34.895, -117.023],  // Barstow / Rainbow Basin
+    [34.610, -119.050],  // Los Padres NF / Reyes Peak
+  ];
+
+  // Return route
+  const retRoute = [
+    [36.606, -118.058],  // Lone Pine / Alabama Hills
+    [37.975, -119.122],  // Mono Lake
+    [37.649, -118.972],  // Mammoth Lakes
+    [37.364, -118.395],  // Bishop
+    [38.067, -117.231],  // Tonopah NV
+    [37.677, -113.062],  // Cedar City UT
+    [37.777, -111.601],  // Grand Staircase
+    [38.297, -111.261],  // Capitol Reef
+    [37.346, -108.290],  // Mancos
+  ];
+
+  L.polyline(outRoute, { color: TERRA, weight: 3.5, opacity: 0.9 }).addTo(map);
+  L.polyline(retRoute, { color: TEAL,  weight: 3.5, opacity: 0.9 }).addTo(map);
+
+  function makeIcon(label, color) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid rgba(255,255,255,0.6)"><span style="transform:rotate(45deg);font-size:10px;font-weight:700;color:white;font-family:sans-serif">${label}</span></div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
+      popupAnchor: [0, -33]
+    });
+  }
+
+  const stops = [
+    { pos:[37.346,-108.290], lbl:'⌂',   col:'#888',  title:'Mancos, Colorado',                    tag:'Start & Finish',         drive:'—',                      camp:'🏠 Home',                        leash:'—' },
+    { pos:[37.311,-109.878], lbl:'1',   col:TERRA,   title:'Valley of the Gods BLM',              tag:'Outbound · Day 1',       drive:'~2.5h from Mancos',      camp:'⛺ BLM stop (no overnight)',     leash:'🐾🐾 Off-Leash' },
+    { pos:[36.998,-110.099], lbl:'1',   col:TERRA,   title:'Monument Valley overlook',            tag:'Outbound · Day 1',       drive:'~3.5h from Mancos',      camp:'— (45 min stop, no hike)',      leash:'🐾 Photos only' },
+    { pos:[35.198,-111.651], lbl:'1',   col:TERRA,   title:'Flagstaff · Coconino NF',             tag:'Outbound · Day 1',       drive:'~6h from Mancos',        camp:'🌲 NF dispersed, free, 2,100m', leash:'🐾 NF Off-Leash' },
+    { pos:[35.327,-112.877], lbl:'2',   col:TERRA,   title:'Seligman · Route 66',                 tag:'Outbound · Day 2',       drive:'Drive stop',             camp:'— (pass through)',              leash:'Dogs welcome on patios' },
+    { pos:[34.895,-117.023], lbl:'2',   col:TERRA,   title:'Rainbow Basin BLM (Barstow)',         tag:'Outbound · Day 2',       drive:'~5h from Flagstaff',     camp:'⛺ BLM free OR Motel $60-80',   leash:'🐾 Off-Leash' },
+    { pos:[34.610,-119.050], lbl:'3-5', col:GOLD,    title:'Los Padres NF · Reyes Peak',          tag:'Days 3–5 (P3 + dogs)',   drive:'~1.5h from WeHo via CA-33', camp:'🌲 NF dispersed, free, 2,000m',  leash:'🐾🐾 Off-Leash NF' },
+    { pos:[34.090,-118.360], lbl:'LA',  col:GOLD,    title:'West Hollywood',                      tag:'Days 4–5 (P1+P2)',       drive:'Uber ~$65',              camp:'🏨 Andaz WeHo — no pet fee',    leash:'🎬 Film & Hollywood' },
+    { pos:[36.606,-118.058], lbl:'5',   col:TEAL,    title:'Lone Pine · Alabama Hills BLM',       tag:'Return · Day 5 (night)', drive:'~3–3.5h from Ventura',   camp:'⛺ BLM dispersed free OR Dow Villa Motel', leash:'🐾🐾 Off-Leash · Film location' },
+    { pos:[37.975,-119.122], lbl:'6',   col:TEAL,    title:'Mono Lake · BLM',                     tag:'Return · Day 6',         drive:'Drive stop',             camp:'⛺ BLM (no overnight)',          leash:'🐾🐾 Off-Leash' },
+    { pos:[37.649,-118.972], lbl:'6-7', col:TEAL,    title:'Mammoth Lakes · Inyo NF',             tag:'Return · Days 6–7',      drive:'~1.5h from Lone Pine',   camp:'🌲 Inyo NF dispersed, free',    leash:'🐾🐾 Best off-leash on trip!' },
+    { pos:[38.067,-117.231], lbl:'8',   col:TEAL,    title:'Tonopah, Nevada · BLM',               tag:'Return · Day 8',         drive:'~5h from Mammoth',       camp:'⛺ BLM Nevada, 1,800m, free',   leash:'🐾🐾 Off-Leash · Dark sky' },
+    { pos:[37.777,-111.601], lbl:'9',   col:TEAL,    title:'Grand Staircase BLM',                 tag:'Return · Day 9',         drive:'~5.5h from Tonopah',     camp:'⛺ BLM Hole-in-the-Rock, free', leash:'🐾🐾 Off-Leash everywhere' },
+    { pos:[38.297,-111.261], lbl:'10',  col:TEAL,    title:'Capitol Reef · Drive stop',           tag:'Return · Day 10',        drive:'On the way to Mancos',   camp:'— (pass through)',              leash:'🐾 BLM near Torrey' },
+  ];
+
+  stops.forEach(s => {
+    L.marker(s.pos, { icon: makeIcon(s.lbl, s.col) }).addTo(map)
+      .bindPopup(`<div class="popup-inner"><div class="popup-title">${s.title}</div><div class="popup-row"><span class="popup-tag">${s.tag}</span></div><div class="popup-row">⏱ ${s.drive}</div><div class="popup-row">${s.camp}</div><div class="popup-row">${s.leash}</div></div>`, { maxWidth: 250 });
+  });
+
+  // Nav highlight on scroll
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.querySelector(link.getAttribute('href'));
+      if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.25 });
+
+  document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
